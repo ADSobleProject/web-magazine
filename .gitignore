@@ -3,8 +3,8 @@ node_modules/
 *.log
 
 # 내부 문서(명세·시안)는 공개 저장소에 올리지 않는다.
-docs/
+/docs/
 
-# 로컬 DB와 업로드 파일
-data/
-uploads/
+# 로컬 DB와 업로드 파일. 앞의 /는 프로젝트 맨 위 폴더만 뜻한다(src/data 같은 하위 폴더는 제외하지 않음).
+/data/
+/uploads/
