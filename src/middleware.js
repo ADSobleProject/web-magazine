@@ -21,6 +21,10 @@ export function securityHeaders(req, res, next) {
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
     'Cross-Origin-Opener-Policy': 'same-origin'
   });
+  // 운영 환경은 항상 https라서 브라우저가 이후 접속도 https로만 하도록 알린다. 로컬(http) 개발에는 붙이지 않는다.
+  if (process.env.NODE_ENV === 'production') {
+    res.set('Strict-Transport-Security', 'max-age=31536000');
+  }
   next();
 }
 
