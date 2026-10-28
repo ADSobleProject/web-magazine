@@ -1,7 +1,7 @@
 // 메인 페이지: 영역별 데이터를 동시에 요청하고, 응답이 오는 영역부터 채운다(명세 3장 A).
 import { api } from '../lib/api.js';
 import { el } from '../lib/dom.js';
-import { safeUrl } from '../lib/format.js';
+import { safeImageUrl, safeUrl } from '../lib/format.js';
 import { articleCard, videoCard } from '../components/cards.js';
 import { createPager } from '../components/pager.js';
 import { fillSection } from '../components/section.js';
@@ -41,7 +41,7 @@ export function initHome(root = document) {
   const bannerHost = root.querySelector('#banner');
   const banners = api.banners().then((data) => {
     const items = data.items
-      .map((b) => ({ ...b, href: safeUrl(b.url, { allowExternal: true }), src: safeUrl(b.image) }))
+      .map((b) => ({ ...b, href: safeUrl(b.url, { allowExternal: true }), src: safeImageUrl(b.image) }))
       .filter((b) => b.href && b.src);
     if (!items.length) return;
     bannerHost.replaceChildren(...items.map((b) =>

@@ -1,13 +1,13 @@
 // 기사 카드는 어디서나 같은 정보 구조를 쓴다: 썸네일 1, 제목 1, 보조 문장 1(명세 2-3).
 import { el } from '../lib/dom.js';
-import { formatCount, formatDuration, relativeTime, safeUrl } from '../lib/format.js';
+import { formatCount, formatDuration, relativeTime, safeImageUrl, safeUrl } from '../lib/format.js';
 
 export const FALLBACK_IMAGE = '/img/fallback.svg';
 
 // 이미지 자리를 비율로 미리 확보해 목록이 흔들리지 않게 하고, 실패하면 대체 이미지로 바꾼다.
 export function thumb(src, alt, ratio = 'r43') {
   const img = el('img', {
-    src: safeUrl(src) || FALLBACK_IMAGE,
+    src: safeImageUrl(src) || FALLBACK_IMAGE,
     alt,
     width: 400,
     height: 300,

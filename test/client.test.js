@@ -188,6 +188,25 @@ test('위험한 제목은 글자로만 보이고 실행되지 않는다', async 
   }
 });
 
+test('Cloudinary 대표 이미지는 카드에 그대로, 허용하지 않은 주소는 대체 이미지로', async () => {
+  const cdn = 'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_1600/v1/web-magazine/a';
+  const other = await startServer({
+    mutate: async (db) => {
+      await db.query('UPDATE articles SET thumbnail = $1 WHERE id = 100', [cdn]);
+      await db.query("UPDATE articles SET thumbnail = 'https://evil.example/a.png' WHERE id = 101");
+    }
+  });
+  try {
+    await openPage('/', other);
+    await initHome();
+    const src = (id) => $(`#latest a[href^="/article/${id}-"] img`).getAttribute('src');
+    assert.equal(src(100), cdn);
+    assert.equal(src(101), '/img/fallback.svg');
+  } finally {
+    await other.close();
+  }
+});
+
 test('다크 모드: 즉시 바뀌고 안내 문구가 반대를 가리키며 쿠키에 저장된다', async () => {
   await openPage('/');
   window.matchMedia = () => ({ matches: false, addEventListener() {} });

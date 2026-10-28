@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { encodeCursor, decodeCursor } from '../src/lib/cursor.js';
 import { esc, jsonLdScript, parseCookies, themeFromCookie } from '../src/lib/html.js';
-import { formatCount, formatDuration, relativeTime, safeUrl } from '../public/js/lib/format.js';
+import { formatCount, formatDuration, relativeTime, safeImageUrl, safeUrl } from '../public/js/lib/format.js';
 
 test('위치값: 만든 값을 그대로 되읽는다', () => {
   const c = encodeCursor({ publishedAt: 1761609600000, id: 123 });
@@ -44,6 +44,17 @@ test('링크 주소 검사: 위험한 주소는 막는다', () => {
   assert.equal(safeUrl('https://video.example.com/x', { allowExternal: true }), 'https://video.example.com/x');
   assert.equal(safeUrl('http://video.example.com/x', { allowExternal: true }), null);
   assert.equal(safeUrl('javascript:alert(1)', { allowExternal: true }), null);
+});
+
+test('이미지 주소 검사(화면): 우리 사이트와 Cloudinary(https)만 허용', () => {
+  assert.equal(safeImageUrl('/uploads/a.png'), '/uploads/a.png');
+  const cdn = 'https://res.cloudinary.com/demo/image/upload/f_auto/v1/a';
+  assert.equal(safeImageUrl(cdn), cdn);
+  assert.equal(safeImageUrl('http://res.cloudinary.com/demo/a.png'), null);
+  assert.equal(safeImageUrl('https://res.cloudinary.com.evil.example/a.png'), null);
+  assert.equal(safeImageUrl('https://evil.example/a.png'), null);
+  assert.equal(safeImageUrl('javascript:alert(1)'), null);
+  assert.equal(safeImageUrl('//evil.example/a.png'), null);
 });
 
 test('HTML 안전 처리', () => {

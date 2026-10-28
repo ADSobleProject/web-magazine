@@ -22,6 +22,20 @@ export function formatDuration(seconds) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
+// 이미지 주소: 같은 사이트 경로 또는 Cloudinary(https)만. 서버의 허용 목록(src/lib/sanitize.js)과 같게 유지한다.
+const IMAGE_HOSTS = new Set(['res.cloudinary.com']);
+
+export function safeImageUrl(url) {
+  if (safeUrl(url)) return url;
+  if (typeof url !== 'string') return null;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' && IMAGE_HOSTS.has(u.hostname) ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 // API에서 받은 주소는 같은 사이트 경로(/로 시작, //는 제외) 또는 https만 허용한다.
 // javascript: 같은 주소가 링크에 들어가는 것을 막는다.
 export function safeUrl(url, { allowExternal = false } = {}) {
