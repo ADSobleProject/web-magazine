@@ -1,0 +1,21 @@
+# Render 배포 설정(Blueprint). Render 대시보드에서 이 저장소를 연결하면 이 내용대로 서비스가 만들어진다.
+services:
+  - type: web
+    name: web-magazine
+    runtime: node
+    plan: free
+    # 한국에서 가장 가까운 리전
+    region: singapore
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/categories
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      # 정식 주소. 서비스가 만들어진 뒤 대시보드에서 https://<서비스이름>.onrender.com 또는 연결한 도메인으로 입력한다.
+      - key: SITE_ORIGIN
+        sync: false

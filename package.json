@@ -1,0 +1,21 @@
+{
+  "name": "web-magazine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "웹 매거진 메인 페이지와 카테고리 목록 페이지",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}
