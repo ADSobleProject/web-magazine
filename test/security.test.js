@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { isAllowedImage, sanitizeBody } from '../src/lib/sanitize.js';
 import { checkPasswordRule, hashPassword, verifyPassword } from '../src/auth/password.js';
-import { detectImage } from '../src/lib/images.js';
+import { createImageStore, detectImage, StorageUnavailableError } from '../src/lib/images.js';
 import { parseKst, readArticleForm, toKstInput } from '../src/admin/articleForm.js';
 import { createLoginLimiter } from '../src/auth/rateLimit.js';
 
@@ -72,6 +72,37 @@ test('업로드 판별: 파일 내용으로 형식을 확인하고 SVG·HTML은 
   assert.equal(detectImage(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>')), null);
   assert.equal(detectImage(Buffer.from('<html><script>alert(1)</script></html>')), null);
   assert.equal(detectImage(undefined), null);
+});
+
+test('Cloudinary 설정 오류는 서버를 멈추지 않고, 업로드할 때 원인을 알려 준다', async () => {
+  const png = { ext: 'png', mime: 'image/png' };
+  const cases = [
+    ['cloudinary://<your_api_key>:<your_api_secret>@demo', /예시 글자/],
+    ['not a url', /형식이 올바르지 않습니다/],
+    ['cloudinary://only-cloud-name', /형식이 올바르지 않습니다/]
+  ];
+  for (const [value, message] of cases) {
+    const store = createImageStore({ cloudinaryUrl: value, production: true });
+    assert.equal(store.kind, 'none');
+    await assert.rejects(async () => store.save(PNG, png), (err) => err instanceof StorageUnavailableError && message.test(err.message));
+  }
+  const ok = createImageStore({ cloudinaryUrl: ' CLOUDINARY_URL=cloudinary://123:secret@demo ', production: true });
+  assert.equal(ok.kind, 'cloudinary', '앞의 CLOUDINARY_URL=과 공백은 무시');
+});
+
+test('Cloudinary가 접속 정보를 거절하면(401) 설정을 확인하라고 알려 준다', async () => {
+  const realFetch = globalThis.fetch;
+  const realError = console.error;
+  globalThis.fetch = async () => new Response(JSON.stringify({ error: { message: 'Invalid Signature' } }), { status: 401 });
+  console.error = () => {};
+  try {
+    const store = createImageStore({ cloudinaryUrl: 'cloudinary://123:wrong@demo', production: true });
+    await assert.rejects(store.save(PNG, { ext: 'png', mime: 'image/png' }),
+      (err) => err instanceof StorageUnavailableError && /API Key, API Secret/.test(err.message));
+  } finally {
+    globalThis.fetch = realFetch;
+    console.error = realError;
+  }
 });
 
 test('기사 입력 검사: 필수값, 카테고리, 주소 이름, 이미지 주소', () => {
