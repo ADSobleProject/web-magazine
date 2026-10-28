@@ -2,6 +2,10 @@
 import { SITE } from '../config.js';
 import { esc } from '../lib/html.js';
 import { categoryUrl } from '../data/repository.js';
+import { isAllowedImage, sanitizeBody } from '../lib/sanitize.js';
+import { formatKst } from '../lib/time.js';
+
+const FALLBACK_IMAGE = '/img/fallback.svg';
 
 export const TABS = [
   { key: 'popular', label: '인기' },
@@ -63,15 +67,35 @@ ${NOSCRIPT}
 </div>`;
 }
 
-// 기사 상세는 이번 범위 밖이라 안내만 보여 준다(명세 3장 F).
-export function articleMain(article) {
-  return `<div class="wrap article-stub">
-<p class="meta"><a class="cat" href="${esc(article.categoryUrl)}">${esc(article.category)}</a></p>
-<h1>${esc(article.title)}</h1>
-<p class="s">${esc(article.deck)}</p>
-<div class="notice"><p>기사 본문 화면은 준비 중입니다.</p></div>
-<a class="more" href="/">메인으로 이동</a>
-</div>`;
+function relatedCard(a) {
+  return `<a class="card" href="${esc(a.url)}">
+<div class="art r43"><img src="${esc(isAllowedImage(a.thumbnail) ? a.thumbnail : FALLBACK_IMAGE)}" alt="${esc(a.title)}" width="400" height="300" loading="lazy" decoding="async"></div>
+<div class="meta"><span class="cat">${esc(a.category)}</span><span>조회 ${a.views.toLocaleString('ko-KR')}</span></div>
+<h3 class="t">${esc(a.title)}</h3>
+<p class="s">${esc(a.deck)}</p>
+</a>`;
+}
+
+// 기사 상세(명세 3장 F). 본문은 저장할 때 정리했지만 보여 줄 때도 한 번 더 정리한다.
+export function articleMain(article, related = [], { preview = false } = {}) {
+  const hero = isAllowedImage(article.thumbnail)
+    ? `<figure class="article-hero"><img src="${esc(article.thumbnail)}" alt="${esc(article.title)}" width="1200" height="900" decoding="async"></figure>`
+    : '';
+  return `${preview ? `<div class="wrap"><p class="preview-note" role="status">미리보기 화면입니다. 방문자에게는 ${article.visible ? '이 모습으로 보입니다' : '아직 보이지 않습니다'}.</p></div>` : ''}
+<article class="wrap article">
+  <header class="article-head">
+    <p class="meta"><a class="cat" href="${esc(article.categoryUrl)}">${esc(article.category)}</a>${article.sub ? `<a href="${esc(categoryUrl(article.category, article.sub))}">${esc(article.sub)}</a>` : ''}</p>
+    <h1>${esc(article.title)}</h1>
+    ${article.deck ? `<p class="article-deck">${esc(article.deck)}</p>` : ''}
+    <p class="meta">${article.publishedAt ? `<time datetime="${esc(article.publishedAt)}">${esc(formatKst(article.publishedAt))}</time>` : '<span>게시 전</span>'}<span>조회 ${article.views.toLocaleString('ko-KR')}</span></p>
+  </header>
+  ${hero}
+  <div class="article-body">${sanitizeBody(article.bodyHtml)}</div>
+</article>
+${related.length ? `<section class="wrap sec" aria-labelledby="h-related">
+  <h2 class="sec-title" id="h-related">${esc(article.category)} 최신 기사</h2>
+  <div class="grid">${related.map(relatedCard).join('')}</div>
+</section>` : ''}`;
 }
 
 export function infoMain(label) {
@@ -106,13 +130,17 @@ export function categoryJsonLd(category) {
   };
 }
 
-export function articleJsonLd(article) {
-  return {
+export function articleJsonLd(article, imageUrl) {
+  const data = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: article.title,
     description: article.deck,
     datePublished: article.publishedAt,
-    articleSection: article.category
+    dateModified: article.updatedAt,
+    articleSection: article.category,
+    publisher: { '@type': 'Organization', name: SITE.name }
   };
+  if (imageUrl) data.image = [imageUrl];
+  return data;
 }

@@ -10,10 +10,16 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --test \"test/*.test.js\""
+    "test": "node --test \"test/*.test.js\"",
+    "admin:create": "node scripts/create-admin.js"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "@electric-sql/pglite": "^0.5.13",
+    "express": "^5.1.0",
+    "multer": "^2.5.0",
+    "pg": "^8.23.1",
+    "quill": "^2.0.3",
+    "sanitize-html": "^2.18.1"
   },
   "devDependencies": {
     "jsdom": "^26.1.0"

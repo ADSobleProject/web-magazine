@@ -1,7 +1,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { makeRepo, startServer } from './helpers.js';
+import { startServer } from './helpers.js';
 
 let srv;
 before(async () => { srv = await startServer(); });
@@ -134,8 +134,7 @@ test('썸네일: 번호별 SVG, 잘못된 주소는 404', async () => {
 
 test('위험한 제목이 들어와도 서버 화면에서 실행되지 않는다', async () => {
   const evil = '<script>alert(1)</script>"><img src=x onerror=alert(2)>';
-  const { repo } = makeRepo((s) => { s.articles[0].title = evil; });
-  const other = await startServer({ repo });
+  const other = await startServer({ mutate: (db) => db.query('UPDATE articles SET title = $1 WHERE id = 100', [evil]) });
   try {
     const html = await (await fetch(other.base + '/article/100-oversized-coat-shoulder-line')).text();
     assert.ok(!html.includes('<script>alert(1)'));

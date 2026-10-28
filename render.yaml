@@ -16,6 +16,16 @@ services:
         value: "24"
       - key: NODE_ENV
         value: production
-      # 정식 주소. 서비스가 만들어진 뒤 대시보드에서 https://<서비스이름>.onrender.com 또는 연결한 도메인으로 입력한다.
+      # 아래 값들은 비밀이거나 환경마다 달라서 저장소에 넣지 않고 Render 대시보드의 Environment에서 입력한다.
+      # 정식 주소. 예: https://web-magazine.onrender.com
       - key: SITE_ORIGIN
+        sync: false
+      # Neon Postgres 접속 주소. 없으면 서버가 시작하지 않는다(무료 서버 디스크는 재시작 때 지워지므로).
+      - key: DATABASE_URL
+        sync: false
+      # Cloudinary 접속 정보. 예: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+      - key: CLOUDINARY_URL
+        sync: false
+      # 첫 관리자 만들기(/admin/setup)에 쓰는 일회용 설정 코드. 16자 이상. 첫 관리자를 만든 뒤에는 지워도 된다.
+      - key: ADMIN_SETUP_TOKEN
         sync: false

@@ -4,3 +4,7 @@ node_modules/
 
 # 내부 문서(명세·시안)는 공개 저장소에 올리지 않는다.
 docs/
+
+# 로컬 DB와 업로드 파일
+data/
+uploads/

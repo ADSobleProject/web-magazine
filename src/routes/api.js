@@ -19,20 +19,20 @@ export function apiRouter(repo) {
     next();
   });
 
-  router.get('/articles/latest', (req, res) => {
+  router.get('/articles/latest', async (req, res) => {
     const cursor = readCursor(req);
     if (cursor === null) return res.status(400).json({ error: 'invalid_cursor' });
-    res.json(repo.latest(cursor));
+    res.json(await repo.latest(cursor));
   });
 
-  router.get('/articles/popular', (req, res) => res.json({ items: repo.popular() }));
-  router.get('/articles/featured', (req, res) => res.json({ items: repo.featured() }));
-  router.get('/articles/rising', (req, res) => res.json({ items: repo.rising() }));
+  router.get('/articles/popular', async (req, res) => res.json({ items: await repo.popular() }));
+  router.get('/articles/featured', async (req, res) => res.json({ items: await repo.featured() }));
+  router.get('/articles/rising', async (req, res) => res.json({ items: await repo.rising() }));
   router.get('/categories', (req, res) => res.json({ items: repo.categories() }));
-  router.get('/videos', (req, res) => res.json({ items: repo.videos() }));
-  router.get('/banners', (req, res) => res.json({ items: repo.banners() }));
+  router.get('/videos', async (req, res) => res.json({ items: await repo.videos() }));
+  router.get('/banners', async (req, res) => res.json({ items: await repo.banners() }));
 
-  router.get('/categories/:name/articles', (req, res) => {
+  router.get('/categories/:name/articles', async (req, res) => {
     const category = repo.findCategory(req.params.name);
     if (!category) return res.status(404).json({ error: 'category_not_found' });
 
@@ -43,7 +43,7 @@ export function apiRouter(repo) {
     const cursor = readCursor(req);
     if (cursor === null) return res.status(400).json({ error: 'invalid_cursor' });
 
-    res.json(repo.categoryArticles(category.name, { sub, cursor }));
+    res.json(await repo.categoryArticles(category.name, { sub, cursor }));
   });
 
   router.use((req, res) => {

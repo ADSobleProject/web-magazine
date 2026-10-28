@@ -3,7 +3,7 @@ const CSP = [
   "default-src 'self'",
   "script-src 'self'",
   "style-src 'self'",
-  "img-src 'self' data:",
+  "img-src 'self' data: https://res.cloudinary.com",
   "font-src 'self'",
   "connect-src 'self'",
   "object-src 'none'",

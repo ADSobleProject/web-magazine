@@ -2,7 +2,7 @@
 import { test, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { makeRepo, startServer, waitFor } from './helpers.js';
+import { startServer, waitFor } from './helpers.js';
 import { initHome } from '../public/js/pages/home.js';
 import { initCategory } from '../public/js/pages/category.js';
 import { initThemeToggle } from '../public/js/lib/theme.js';
@@ -158,8 +158,7 @@ test('카테고리: 대표 2건 + 일반 6건, 더보기 후 마지막 안내', 
 });
 
 test('카테고리: 세부 분류 필터는 주소에 남고, 기사가 없으면 빈 목록 안내', async () => {
-  const { repo } = makeRepo((s) => { s.articles = s.articles.filter((a) => a.sub !== '트렌드'); });
-  const other = await startServer({ repo });
+  const other = await startServer({ mutate: (db) => db.query("DELETE FROM articles WHERE sub = '트렌드'") });
   try {
     await openPage('/category/' + encodeURIComponent('패션') + '?sub=' + encodeURIComponent('트렌드'), other);
     assert.equal($('.chip[aria-current="page"]').textContent, '트렌드');
@@ -174,8 +173,7 @@ test('카테고리: 세부 분류 필터는 주소에 남고, 기사가 없으�
 
 test('위험한 제목은 글자로만 보이고 실행되지 않는다', async () => {
   const evil = '<img src=x onerror="window.__hacked=1">';
-  const { repo } = makeRepo((s) => { for (const a of s.articles) a.title = evil; });
-  const other = await startServer({ repo });
+  const other = await startServer({ mutate: (db) => db.query('UPDATE articles SET title = $1', [evil]) });
   try {
     await openPage('/', other);
     await initHome();

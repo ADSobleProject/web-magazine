@@ -50,7 +50,7 @@ function footer() {
  */
 export function layout({
   title = null, description = SITE.description, path = '/', page, theme = null,
-  categories, activeCategory = null, main, jsonLd = null, robots = null, mainAttrs = ''
+  categories, activeCategory = null, main, jsonLd = null, robots = null, mainAttrs = '', image = null
 }) {
   const fullTitle = title ? `${title} | ${SITE.name}` : SITE.name;
   const canonical = SITE.origin ? SITE.origin + path : null;
@@ -66,7 +66,8 @@ ${robots ? `<meta name="robots" content="${esc(robots)}">\n` : ''}${canonical ? 
 <meta property="og:site_name" content="${esc(SITE.name)}">
 <meta property="og:title" content="${esc(fullTitle)}">
 <meta property="og:description" content="${esc(description)}">
-<meta name="twitter:card" content="summary_large_image">
+${image ? `<meta property="og:image" content="${esc(image)}">
+` : ''}<meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="/css/site.css">
 <script src="/js/theme-init.js"></script>

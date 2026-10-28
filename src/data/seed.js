@@ -1,12 +1,6 @@
-// 시안의 가상 콘텐츠를 옮긴 샘플 데이터. 실제 서비스에서는 DB 조회로 대체한다.
-export const CATEGORIES = [
-  { key: 'fashion', name: '패션', subs: ['컬렉션', '스타일', '트렌드'] },
-  { key: 'beauty', name: '뷰티', subs: ['스킨케어', '메이크업', '향'] },
-  { key: 'food', name: '푸드', subs: ['레시피', '맛집', '음료'] },
-  { key: 'life', name: '라이프', subs: ['공간', '건강', '관계'] },
-  { key: 'tech', name: '테크', subs: ['기기', '서비스', '인공지능'] },
-  { key: 'culture', name: '컬처', subs: ['영화', '음악', '전시'] }
-];
+// 시안의 가상 콘텐츠를 옮긴 샘플 데이터. 첫 실행 때 DB에 한 번만 들어가며(migrations.js),
+// 관리자 화면에서 한꺼번에 지울 수 있다.
+import { CATEGORIES } from './categories.js';
 
 // 형식: 세부 분류 번호|제목|보조 문장|주소용 영문 요약 이름
 const RAW = {
@@ -128,5 +122,5 @@ export function buildSeed(now = Date.now()) {
     url: `https://video.example.com/shorts/v${i + 1}`
   }));
 
-  return { categories: CATEGORIES, articles, videos, banners: [] };
+  return { articles, videos };
 }
